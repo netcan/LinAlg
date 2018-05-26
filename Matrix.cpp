@@ -61,14 +61,14 @@ RetType LinAlg::operator*(const Vector &lhs, const Vector &rhs) {
 
 
 
-Vector Matrix::getNRowVec(size_t n) {
+Vector Matrix::getNRowVec(size_t n) const {
 	assert(n < getRowSize());
 	return Vector(data[n], VecType::Row);
 }
 
-Vector Matrix::getNColVec(size_t n) {
+Vector Matrix::getNColVec(size_t n) const {
 	assert(n < getColSize());
-	Vector ret(getColSize());
+	Vector ret(getRowSize());
 	for(int i = getRowSize() - 1; i >= 0; --i)
 		ret.data[i] = data[i][n];
 	return ret;
@@ -91,6 +91,34 @@ Matrix Matrix::T() {
 	return ret;
 }
 
-Matrix LinAlg::operator*(Matrix lhs, const Matrix &rhs) {
+Matrix& Matrix::operator+=(const Matrix &rhs) {
+	assert(getRowSize() == rhs.getRowSize() && getColSize() == rhs.getColSize());
+	for(size_t i = 0; i < getRowSize(); ++i)
+		for (size_t j = 0; j < getColSize(); ++j)
+			data[i][j] += rhs.data[i][j];
+	return *this;
+}
 
+Matrix& Matrix::operator-=(const Matrix &rhs) {
+	assert(getRowSize() == rhs.getRowSize() && getColSize() == rhs.getColSize());
+	*this += rhs * -1;
+	return *this;
+}
+
+Matrix& Matrix::operator*=(double c) {
+	for(size_t i = 0; i < getRowSize(); ++i)
+		for (size_t j = 0; j < getColSize(); ++j)
+			data[i][j] *= c;
+	return *this;
+}
+
+
+
+Matrix LinAlg::operator*(Matrix lhs, const Matrix &rhs) {
+	assert(lhs.getColSize() == rhs.getRowSize());
+	Matrix ret(lhs.getRowSize(), rhs.getColSize());
+	for(size_t i = 0; i < lhs.getRowSize(); ++i)
+		for (size_t j = 0; j < rhs.getColSize(); ++j)
+			ret.data[i][j] = (lhs.getNRowVec(i) * rhs.getNColVec(j))._data.val;
+	return ret;
 }

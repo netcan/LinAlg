@@ -13,15 +13,19 @@ int main() {
 	Vector x({1,2,3}, VecType::Row);
 	Vector y({4,5,6,7}, VecType::Row);
 	y.setType(VecType::Col);
-	(y * x).show();
-	puts("");
 
 	Matrix m({
 		 {1,2,3,4},
 		 {5,6,7,8},
 		 {9,10,11,12},
 	});
-	m.T().show();
+	Matrix n({
+		 {5,6,7,8},
+		 {1,2,3,4},
+		 {9,10,11,12},
+	 });
+
+	(m * n.T()).show();
 
 	return 0;
 }

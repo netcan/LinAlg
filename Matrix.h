@@ -46,9 +46,9 @@ namespace LinAlg {
 		Vector& operator-=(const Vector &rhs);
 
 		Vector& operator*=(double c);
+
 		friend Vector operator*(Vector lhs, double c) { lhs *= c; return lhs; }
 		friend Vector operator*(double c, Vector lhs) { lhs *= c; return lhs; }
-
 		friend Vector operator+(Vector lhs, const Vector &rhs) { lhs += rhs; return lhs; }
 		friend Vector operator-(Vector lhs, const Vector &rhs) { lhs -= rhs; return lhs; }
 		friend RetType operator*(const Vector &lhs, const Vector &rhs);
@@ -61,16 +61,27 @@ namespace LinAlg {
 	public:
 		friend RetType;
 		friend RetType operator*(const Vector &lhs, const Vector &rhs);
-		friend Matrix operator*(Matrix lhs, const Matrix &rhs);
 
 		Matrix(size_t row = 1, size_t col = 1): data(row, vector<double>(col, 0.0)) {}
 		Matrix(const vector<vector<double>> & data): data(data) {}
 		size_t getRowSize() const { return data.size(); } // 获取行数
 		size_t getColSize() const { return data[0].size(); } // 获取列数
-		Vector getNRowVec(size_t n);
-		Vector getNColVec(size_t n);
+		Vector getNRowVec(size_t n) const;
+		Vector getNColVec(size_t n) const;
 		void show();
+
 		Matrix T();
+
+		Matrix& operator+=(const Matrix &rhs);
+		Matrix& operator-=(const Matrix &rhs);
+		Matrix& operator*=(double c);
+
+		friend Matrix operator*(Matrix lhs, double c) { lhs *= c; return lhs; }
+		friend Matrix operator*(double c, Matrix lhs) { lhs *= c; return lhs; }
+		friend Matrix operator+(Matrix lhs, const Matrix &rhs) { lhs += rhs; return lhs; }
+		friend Matrix operator-(Matrix lhs, const Matrix &rhs) { lhs -= rhs; return lhs; }
+		friend Matrix operator*(Matrix lhs, const Matrix &rhs);
+
 	};
 
 	struct RetType {
