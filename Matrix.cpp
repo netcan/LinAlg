@@ -7,7 +7,10 @@
  ****************************************************************************/
 
 #include "Matrix.h"
+#include <cmath>
+#include <algorithm>
 using namespace LinAlg;
+using std::make_pair;
 
 void Vector::show() {
 	printf(type == VecType::Row ? "R":"C");
@@ -121,4 +124,55 @@ Matrix LinAlg::operator*(Matrix lhs, const Matrix &rhs) {
 		for (size_t j = 0; j < rhs.getColSize(); ++j)
 			ret.data[i][j] = (lhs.getNRowVec(i) * rhs.getNColVec(j))._data.val;
 	return ret;
+}
+
+Matrix Matrix::LUdecomp() const {
+	Matrix LU(*this); // 最终结果存放到一个矩阵中
+	size_t s = std::min(getRowSize(), getColSize());
+	for(size_t k = 0; k < s; ++k) {
+		double x = 1.0 / LU.data[k][k];
+		// l1 = 1/a_{11} * ...
+		for(size_t i = k + 1; i < getRowSize(); ++i)
+			LU.data[i][k] *= x;
+		// A -= lu^t,
+		for(size_t i = k + 1; i < getRowSize(); ++i)
+			for(size_t j = k + 1; j < getColSize(); ++j)
+				LU.data[i][j] -= LU.data[i][k] * LU.data[k][j];
+	}
+	return LU;
+}
+
+void Matrix::PLU_P_update(vector<size_t> &P, const Matrix &mat, size_t k) const {
+	size_t row_idx = k;
+	double max_val = fabs(mat.data[P[k]][k]);
+	for(size_t i = k; i < mat.getRowSize(); ++i) {
+		double x = fabs(mat.data[P[i]][k]);
+		if(x > max_val) {
+			x = max_val;
+			row_idx = i;
+		}
+	}
+	std::swap(P[k], P[row_idx]);
+}
+
+pair<vector<size_t>, Matrix> Matrix::PLUdecomp() const {
+	// PA = A' = LU
+	vector<size_t> P(getRowSize());
+	Matrix LU(*this);
+	size_t s = std::min(getRowSize(), getColSize());
+	for(size_t i = 0; i < getRowSize(); ++i) P[i] = i;
+
+	for(size_t k = 0; k < s; ++k) {
+		// 选主元
+		PLU_P_update(P, LU, k);
+		double x = 1.0 / LU.data[P[k]][k];
+		// l1 = 1/a_{11} * ...
+		for(size_t i = k + 1; i < getRowSize(); ++i)
+			LU.data[P[i]][k] *= x;
+		// A -= lu^t,
+		for(size_t i = k + 1; i < getRowSize(); ++i)
+			for(size_t j = k + 1; j < getColSize(); ++j)
+				LU.data[P[i]][j] -= LU.data[P[i]][k] * LU.data[P[k]][j];
+	}
+	return make_pair(P, LU);
 }

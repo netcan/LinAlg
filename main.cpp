@@ -25,7 +25,12 @@ int main() {
 		 {9,10,11,12},
 	 });
 
-	(m * n.T()).show();
+	m.show();
+	auto plu = m.PLUdecomp();
+	for(auto x: plu.first)
+		printf("%ld ", x);
+	puts("");
+	plu.second.show();
 
 	return 0;
 }

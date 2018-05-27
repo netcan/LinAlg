@@ -12,6 +12,7 @@
 #include <vector>
 #include "stdio.h"
 using std::vector;
+using std::pair;
 using std::initializer_list;
 
 namespace LinAlg {
@@ -57,7 +58,9 @@ namespace LinAlg {
 
 	class Matrix {
 	private:
-		vector<vector<double>> data; // 列向量集合
+		vector<vector<double>> data;
+		// PLU分解的选主元，每次选择绝对值最大的一行
+		void PLU_P_update(vector<size_t> &P, const Matrix &mat, size_t k) const;
 	public:
 		friend RetType;
 		friend RetType operator*(const Vector &lhs, const Vector &rhs);
@@ -68,6 +71,8 @@ namespace LinAlg {
 		size_t getColSize() const { return data[0].size(); } // 获取列数
 		Vector getNRowVec(size_t n) const;
 		Vector getNColVec(size_t n) const;
+		Matrix LUdecomp() const;
+		pair<vector<size_t>, Matrix> PLUdecomp() const;
 		void show();
 
 		Matrix T();
