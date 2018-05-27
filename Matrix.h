@@ -35,7 +35,7 @@ namespace LinAlg {
 	public:
 		friend class Matrix;
 		friend RetType;
-		Vector(size_t n = 1, VecType type = VecType::Col): data(n, 0), type(type) {};
+		Vector(size_t n = 1, VecType type = VecType::Col): data(n, 0.0), type(type) {};
 		Vector(initializer_list<double>&& data, VecType type = VecType::Col): data(data), type(type) {}
 		Vector(const vector<double>& data, VecType type = VecType::Col): data(data), type(type) {}
 
@@ -47,6 +47,8 @@ namespace LinAlg {
 
 		Vector& operator+=(const Vector &rhs);
 		Vector& operator-=(const Vector &rhs);
+		double &operator[](size_t i) { return data[i]; }
+		const double &operator[](size_t i) const { return data[i]; }
 
 		Vector& operator*=(double c);
 
@@ -74,7 +76,9 @@ namespace LinAlg {
 		Matrix LUdecomp() const;
 		PLUType PLUdecomp() const;
 		Vector LUsolve(const Vector &y) const;
-		double det() const;
+		double det() const; // 行列式
+		Matrix inv() const; // 逆矩阵
+		vector<double> Jacobi() const; // 求出**实对称**矩阵的所有特征值
 		void show();
 
 		Matrix T();
@@ -94,6 +98,7 @@ namespace LinAlg {
 		void PLU_P_update(vector<size_t> &P, const Matrix &mat, size_t k) const;
 		Vector LUsolve_L(const Matrix &LU, const Vector &y) const;
 		Vector LUsolve_U(const Matrix &LU, const Vector &z) const;
+		void R(double cosphi, size_t p, size_t q, bool T = true);
 	};
 
 	struct RetType {
