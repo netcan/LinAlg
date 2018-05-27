@@ -23,7 +23,9 @@ namespace LinAlg {
 		Col
 	};
 
-	const static double eps = 1e-30;
+	const static double eps = 1e-12;
+	bool Eq(double a, double b);
+	bool isZero(double a);
 	class Matrix;
 
 	class Vector {
@@ -57,13 +59,11 @@ namespace LinAlg {
 	};
 
 	class Matrix {
-	private:
-		vector<vector<double>> data;
-		// PLU分解的选主元，每次选择绝对值最大的一行
-		void PLU_P_update(vector<size_t> &P, const Matrix &mat, size_t k) const;
 	public:
 		friend RetType;
 		friend RetType operator*(const Vector &lhs, const Vector &rhs);
+
+		using PLUType = pair<vector<size_t>, Matrix>;
 
 		Matrix(size_t row = 1, size_t col = 1): data(row, vector<double>(col, 0.0)) {}
 		Matrix(const vector<vector<double>> & data): data(data) {}
@@ -72,11 +72,12 @@ namespace LinAlg {
 		Vector getNRowVec(size_t n) const;
 		Vector getNColVec(size_t n) const;
 		Matrix LUdecomp() const;
-		pair<vector<size_t>, Matrix> PLUdecomp() const;
+		PLUType PLUdecomp() const;
+		Vector LUsolve(const Vector &y) const;
+		double det() const;
 		void show();
 
 		Matrix T();
-
 		Matrix& operator+=(const Matrix &rhs);
 		Matrix& operator-=(const Matrix &rhs);
 		Matrix& operator*=(double c);
@@ -87,6 +88,12 @@ namespace LinAlg {
 		friend Matrix operator-(Matrix lhs, const Matrix &rhs) { lhs -= rhs; return lhs; }
 		friend Matrix operator*(Matrix lhs, const Matrix &rhs);
 
+	private:
+		vector<vector<double>> data;
+		// PLU分解的选主元，每次选择绝对值最大的一行
+		void PLU_P_update(vector<size_t> &P, const Matrix &mat, size_t k) const;
+		Vector LUsolve_L(const Matrix &LU, const Vector &y) const;
+		Vector LUsolve_U(const Matrix &LU, const Vector &z) const;
 	};
 
 	struct RetType {

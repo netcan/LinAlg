@@ -12,6 +12,14 @@
 using namespace LinAlg;
 using std::make_pair;
 
+bool LinAlg::Eq(double a, double b) {
+	return fabs(a-b) < eps;
+}
+
+bool LinAlg::isZero(double a) {
+	return fabs(a) < eps;
+}
+
 void Vector::show() {
 	printf(type == VecType::Row ? "R":"C");
 	printf("(");
@@ -175,4 +183,58 @@ pair<vector<size_t>, Matrix> Matrix::PLUdecomp() const {
 				LU.data[P[i]][j] -= LU.data[P[i]][k] * LU.data[P[k]][j];
 	}
 	return make_pair(P, LU);
+}
+
+double Matrix::det() const {
+	assert(getRowSize() == getColSize() && "size of matrix should be square");
+	PLUType PLU = PLUdecomp();
+	const auto &P = PLU.first;
+	const auto &LU = PLU.second;
+
+	bool sign = false; // 负号
+	for(size_t i = 0; i < PLU.first.size(); ++i)
+		for(size_t j = i + 1; j < PLU.first.size(); ++j)
+			if(PLU.first[i] > PLU.first[j]) sign = !sign;
+	double ret = sign?-1.0:1.0;
+	// det(A) = det(PLU) = det(P)det(L)det(U) = det(P)det(U)
+	for(size_t i = 0; i < LU.data.size(); ++i)
+		ret *= LU.data[P[i]][i];
+	return ret;
+}
+
+Vector Matrix::LUsolve_L(const Matrix &LU, const Vector &y) const {
+	// 求出Lz = y的z
+	Vector z(y.getSize());
+
+	for(size_t i = 0; i < z.getSize(); ++i) {
+		z.data[i] = y.data[i];
+		for (size_t j = 0; j < i; ++j)
+			z.data[i] -= LU.data[i][j] * z.data[j];
+	}
+
+	return z;
+}
+
+Vector Matrix::LUsolve_U(const Matrix &LU, const Vector &z) const {
+	// 求出Ux = z的x
+	Vector x(z.getSize());
+
+	for(int i = z.getSize() - 1; i >=0; --i) {
+		x.data[i] = z.data[i];
+		for(int j = i + 1; j < z.getSize(); ++j)
+			x.data[i] -= LU.data[i][j] * x.data[j];
+		x.data[i] /= LU.data[i][i];
+	}
+	return x;
+}
+
+
+Vector Matrix::LUsolve(const Vector &y) const {
+	assert(y.getSize() == getRowSize());
+	assert(! isZero(det()) && "det is equal 0");
+	Matrix LU = std::move(LUdecomp());
+	Vector x(y.getSize());
+	x = std::move(LUsolve_L(LU, y));
+	x = std::move(LUsolve_U(LU, x));
+	return x;
 }
