@@ -6,7 +6,7 @@
  > Created Time: 2018-05-25 -- 17:17
  ****************************************************************************/
 
-#include "Matrix.h"
+#include "LinAlg.h"
 using namespace LinAlg;
 
 int main() {
@@ -30,16 +30,21 @@ int main() {
 	r.show();
 	printf("det(r) = %lf\n", r.det());
 
-	Vector y{16,22,32,44};
+	Vector y({16,22,32,44});
 	Vector x = r.LUsolve(y);
 	x.show();
 	puts("");
 
 	n.inv().show();
 
-	for(auto x: r.Jacobi())
+	double det = 1;
+	for(auto x: r.Jacobi()) {
 		printf("%lf ", x);
+		det *= x;
+	}
 	puts("");
+	printf("%f\n", det);
+	printf("%f\n", r.det());
 
 	return 0;
 }

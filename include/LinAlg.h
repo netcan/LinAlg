@@ -6,14 +6,13 @@
  > Created Time: 2018-05-25 -- 17:08
  ****************************************************************************/
 
-#ifndef MATRIX_MATRIX_H
-#define MATRIX_MATRIX_H
+#ifndef LINALG_H
+#define LINALG_H
 
 #include <vector>
 #include "stdio.h"
 using std::vector;
 using std::pair;
-using std::initializer_list;
 
 namespace LinAlg {
 	struct RetType;
@@ -36,7 +35,7 @@ namespace LinAlg {
 		friend class Matrix;
 		friend RetType;
 		Vector(size_t n = 1, VecType type = VecType::Col): data(n, 0.0), type(type) {};
-		Vector(initializer_list<double>&& data, VecType type = VecType::Col): data(data), type(type) {}
+		Vector(const vector<double>&& data, VecType type = VecType::Col): data(data), type(type) {}
 		Vector(const vector<double>& data, VecType type = VecType::Col): data(data), type(type) {}
 
 		VecType getType() const { return type; }
@@ -125,4 +124,4 @@ namespace LinAlg {
 
 }
 
-#endif //MATRIX_MATRIX_H
+#endif //LINALG_H

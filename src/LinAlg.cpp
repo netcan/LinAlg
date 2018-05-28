@@ -6,7 +6,7 @@
  > Created Time: 2018-05-25 -- 17:09
  ****************************************************************************/
 
-#include "Matrix.h"
+#include "LinAlg.h"
 #include <cmath>
 #include <algorithm>
 using namespace LinAlg;
@@ -51,6 +51,7 @@ Vector& Vector::operator*=(double c) {
 	for(int i = 0; i < getSize(); ++i) data[i] *= c;
 	return *this;
 }
+
 
 
 RetType LinAlg::operator*(const Vector &lhs, const Vector &rhs) {
@@ -266,10 +267,8 @@ void Matrix::R(double cosphi, size_t p, size_t q, bool T) {
 	for(size_t k = 0; k < n; ++k) {
 		double  ap =  data[T?p:k][T?k:p] * cosphi + data[T?q:k][T?k:q] * sinphi,
 				aq = -data[T?p:k][T?k:p] * sinphi + data[T?q:k][T?k:q] * cosphi;
-		data[T?p:k][T?k:p] = ap;
-		data[T?q:k][T?k:q] = aq;
+		data[T?p:k][T?k:p] = ap; data[T?q:k][T?k:q] = aq;
 	}
-
 	return;
 }
 
