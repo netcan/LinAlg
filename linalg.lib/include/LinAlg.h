@@ -68,6 +68,8 @@ namespace LinAlg {
 
 		Matrix(size_t row = 1, size_t col = 1): data(row, vector<double>(col, 0.0)) {}
 		Matrix(const vector<vector<double>> & data): data(data) {}
+		bool isSquare() const { return getRowSize() == getColSize(); }
+		bool isSymmetric() const;
 		size_t getRowSize() const { return data.size(); } // 获取行数
 		size_t getColSize() const { return data[0].size(); } // 获取列数
 		Vector getNRowVec(size_t n) const;
@@ -79,6 +81,7 @@ namespace LinAlg {
 		Matrix inv() const; // 逆矩阵
 		vector<double> Jacobi() const; // 求出**实对称**矩阵的所有特征值
 		void show();
+		double & at(size_t i, size_t j) { return data[i][j]; }
 
 		Matrix T();
 		Matrix& operator+=(const Matrix &rhs);

@@ -8,3 +8,6 @@ import linalg
 v = linalg.Vector([1,2,3,4])
 for i in range(100):
     v += v # print(v)
+    m = linalg.Matrix([[1],[2],[3]])
+
+print(m.getNRowVec(0))

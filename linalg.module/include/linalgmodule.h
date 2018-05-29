@@ -18,6 +18,12 @@ typedef struct {
 	Vector ob_vector;
 } PyVectorObject;
 
+// 定义Matrix类
+typedef struct {
+    PyObject_HEAD;
+    Matrix ob_matrix;
+} PyMatrixObject;
+
 // 函数接口
 static bool
 isNumber(PyObject *o, bool throwErr = true);
@@ -29,7 +35,7 @@ static PyVectorObject *
 PyVector_Copy(PyVectorObject *self);
 
 static void
-PyVector_dealloc(PyVectorObject *self);
+PyLinAlg_dealloc(PyObject *self);
 
 static PyObject *
 PyVector_T(PyVectorObject *self);
@@ -73,4 +79,39 @@ PyVector_add(PyVectorObject *self, PyVectorObject *arg);
 static PyObject *
 PyVector_sub(PyVectorObject *self, PyVectorObject *arg);
 
+static int
+PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds);
+
+static PyObject *
+PyMatrix_str(PyMatrixObject *self);
+
+static PyObject*
+PyMatrix_getRowSize(PyMatrixObject *self);
+
+static PyObject*
+PyMatrix_getColSize(PyMatrixObject *self);
+
+static PyVectorObject*
+PyMatrix_getNRowVec(PyMatrixObject *self, PyObject* i);
+
+static PyVectorObject*
+PyMatrix_getNColVec(PyMatrixObject *self, PyObject* i);
+
+static PyMatrixObject *
+PyMatrix_Copy(PyMatrixObject *self);
+
+static PyMatrixObject *
+PyMatrix_LUdecomp(PyMatrixObject *self);
+
+static PyVectorObject *
+PyMatrix_LUsolve(PyMatrixObject *self, PyVectorObject *y);
+
+static PyObject *
+PyMatrix_det(PyMatrixObject *self);
+
+static PyMatrixObject *
+PyMatrix_inv(PyMatrixObject *self);
+
+static PyVectorObject *
+PyMatrix_Jacobi(PyMatrixObject *self);
 #endif

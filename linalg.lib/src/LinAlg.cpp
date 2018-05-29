@@ -231,8 +231,8 @@ Vector Matrix::LUsolve_U(const Matrix &LU, const Vector &z) const {
 
 Vector Matrix::LUsolve(const Vector &y) const {
 	// Ax = y
-	assert(y.getSize() == getRowSize());
-	assert(! isZero(det()) && "det is equal 0");
+	assert(isSquare());
+//	assert(! isZero(det()) && "det is equal 0");
 	Matrix LU = std::move(LUdecomp());
 	Vector x(y.getSize());
 	x = std::move(LUsolve_L(LU, y));
@@ -242,7 +242,7 @@ Vector Matrix::LUsolve(const Vector &y) const {
 
 Matrix Matrix::inv() const {
 	// A(x_1, ..., x_n) = (e_1, ..., e_n)
-	assert(! isZero(det()) && "matrix is not invertible");
+//	assert(! isZero(det()) && "matrix is not invertible");
 	size_t n = getRowSize();
 	Matrix LU = std::move(LUdecomp());
 	Matrix ret(n, n);
@@ -272,13 +272,18 @@ void Matrix::R(double cosphi, size_t p, size_t q, bool T) {
 	return;
 }
 
-vector<double> Matrix::Jacobi() const {
-	assert(getRowSize() == getColSize());
-	size_t n = getRowSize();
-	for(size_t i = 0; i < n; ++i)
-		for(size_t j = 0; j < n; ++j)
-			assert(Eq(data[i][j], data[j][i]));
+bool Matrix::isSymmetric() const {
+	for(size_t i = 0; i < getRowSize(); ++i)
+		for(size_t j = 0; j < getColSize(); ++j)
+			if(! Eq(data[i][j], data[j][i])) return false;
+	return true;
+}
 
+vector<double> Matrix::Jacobi() const {
+//	assert(isSquare());
+//	assert(isSymmetric());
+
+	size_t n = getRowSize();
 	vector<double> eigenvals(n);
 	Matrix D(*this); // 对角化
 

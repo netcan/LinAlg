@@ -15,6 +15,7 @@ include(GNUInstallDirs)
 install(TARGETS linalg
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
 install(FILES ${CMAKE_BINARY_DIR}/linalg.pc DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
 
 add_executable(main src/main.cpp)
