@@ -7,4 +7,4 @@ import linalg
 
 v = linalg.Vector([1,2,3,4])
 for i in range(100):
-    v *= 5 # print(v)
+    v += v # print(v)

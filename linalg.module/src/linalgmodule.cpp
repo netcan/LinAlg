@@ -46,6 +46,8 @@ static PySequenceMethods PyVectorSeq_methods = {
 
 static PyNumberMethods PyVectorNum_methods = {
     .nb_inplace_multiply = (binaryfunc)PyVector_imul,
+    .nb_inplace_add = (binaryfunc)PyVector_iadd,
+    .nb_inplace_subtract = (binaryfunc)PyVector_isub,
     .nb_multiply = (binaryfunc)PyVector_mul,
     .nb_add = (binaryfunc)PyVector_add,
     .nb_subtract = (binaryfunc)PyVector_sub,
@@ -71,9 +73,9 @@ static PyTypeObject PyVectorType = {
 
 // 函数定义
 static bool
-isNumber(PyObject *o) {
+isNumber(PyObject *o, bool throwErr) {
     bool ret = (PyLong_Check(o) || PyFloat_Check(o));
-    if(!ret) PyErr_SetString(PyExc_TypeError, "value should be number");
+    if(throwErr && !ret) PyErr_SetString(PyExc_TypeError, "value should be number");
     return ret;
 }
 
@@ -96,38 +98,75 @@ PyVector_Copy(PyVectorObject *self) {
 // *=
 static PyObject *
 PyVector_imul(PyVectorObject *self, PyObject *arg) {
-    if(! isNumber(arg)) return NULL;
+    if(!arg || ! isNumber(arg)) return NULL;
     Py_XINCREF(self); // 不加这个会崩溃...
     self->ob_vector *= getNumber(arg);
     return (PyObject*)self;
 }
 
-// 乘法
+// +=
+static PyObject *
+PyVector_iadd(PyVectorObject *self, PyVectorObject *arg) {
+    if(!arg || !PyObject_TypeCheck(arg, &PyVectorType)) {
+        PyErr_SetString(PyExc_TypeError, "vector add vector");
+        return NULL;
+    } else if(self->ob_vector.getSize() != arg->ob_vector.getSize()) {
+        PyErr_SetString(PyExc_TypeError, "two vectors' size mismatch");
+        return NULL;
+    }
+    Py_XINCREF(self);
+    self->ob_vector += arg->ob_vector;
+    return (PyObject*)self;
+}
+
+// -=
+static PyObject *
+PyVector_isub(PyVectorObject *self, PyVectorObject *arg) {
+    if(!arg || !PyObject_TypeCheck(arg, &PyVectorType)) {
+        PyErr_SetString(PyExc_TypeError, "vector sub vector");
+        return NULL;
+    } else if(self->ob_vector.getSize() != arg->ob_vector.getSize()) {
+        PyErr_SetString(PyExc_TypeError, "two vectors' size mismatch");
+        return NULL;
+    }
+    Py_XINCREF(self);
+    self->ob_vector -= arg->ob_vector;
+    return (PyObject*)self;
+}
+
+// 乘法，数乘或者内积
 static PyVectorObject *
 PyVector_mul(PyVectorObject *self, PyObject *arg) {
-    PyVectorObject *tmp = PyVector_Copy(self);
-    PyVector_imul(tmp, arg);
+    PyVectorObject *tmp = PyVector_Copy(self); // refcnt += 1
+    if(isNumber(arg, false)) { // 数乘
+        PyVector_imul(tmp, arg);
+    } else {
+        Py_XDECREF(tmp); return NULL;
+    }
+    Py_XDECREF(tmp); // 记得减去多余的1
     return tmp;
 }
 
 // 向量加法
 static PyObject *
 PyVector_add(PyVectorObject *self, PyVectorObject *arg) {
-    if(!PyObject_TypeCheck(arg, &PyVectorType)) {
-        PyErr_SetString(PyExc_IndexError, "vector add vector");
-        return NULL;
-    } else if(self->ob_vector.getSize() != arg->ob_vector.getSize()) {
-        PyErr_SetString(PyExc_IndexError, "two vectors' size mismatch");
-        return NULL;
-    }
     PyVectorObject *tmp = PyVector_Copy(self);
-    tmp->ob_vector += arg->ob_vector;
+    if(! PyVector_iadd(tmp, arg)) {
+        Py_XDECREF(tmp); return NULL;
+    }
+    Py_XDECREF(tmp); // 记得减去多余的1
     return (PyObject*)tmp;
 }
+
 // 向量减法
 static PyObject *
 PyVector_sub(PyVectorObject *self, PyVectorObject *arg) {
-    return PyVector_add(self, PyVector_mul(arg, Py_BuildValue("i", -1)));
+    PyVectorObject *tmp = PyVector_Copy(self);
+    if(! PyVector_isub(tmp, arg)) {
+        Py_XDECREF(tmp); return NULL;
+    }
+    Py_XDECREF(tmp); // 记得减去多余的1
+    return (PyObject*)tmp;
 }
 
 static PyObject *

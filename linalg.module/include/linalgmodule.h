@@ -20,7 +20,7 @@ typedef struct {
 
 // 函数接口
 static bool
-isNumber(PyObject *o);
+isNumber(PyObject *o, bool throwErr = true);
 
 static double
 getNumber(PyObject *o);
@@ -49,8 +49,17 @@ PyVector_GetItem(PyVectorObject *self, Py_ssize_t i);
 static int
 PyVector_SetItem(PyVectorObject *self, Py_ssize_t i, PyObject *v);
 
+// *=
 static PyObject *
 PyVector_imul(PyVectorObject *self, PyObject *arg);
+
+// +=
+static PyObject *
+PyVector_iadd(PyVectorObject *self, PyVectorObject *arg);
+
+// -=
+static PyObject *
+PyVector_isub(PyVectorObject *self, PyVectorObject *arg);
 
 // 乘法
 static PyVectorObject *
