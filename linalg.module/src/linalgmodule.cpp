@@ -111,7 +111,7 @@ PyVector_iadd(PyVectorObject *self, PyVectorObject *arg) {
         PyErr_SetString(PyExc_TypeError, "vector add vector");
         return NULL;
     }
-	if(self->ob_vector.getSize() != arg->ob_vector.getSize()) {
+    if(self->ob_vector.getSize() != arg->ob_vector.getSize()) {
         PyErr_SetString(PyExc_TypeError, "two vectors' size mismatch");
         return NULL;
     }
@@ -127,7 +127,7 @@ PyVector_isub(PyVectorObject *self, PyVectorObject *arg) {
         PyErr_SetString(PyExc_TypeError, "vector sub vector");
         return NULL;
     }
-	if(self->ob_vector.getSize() != arg->ob_vector.getSize()) {
+    if(self->ob_vector.getSize() != arg->ob_vector.getSize()) {
         PyErr_SetString(PyExc_TypeError, "two vectors' size mismatch");
         return NULL;
     }
@@ -186,7 +186,7 @@ PyVector_SetItem(PyVectorObject *self, Py_ssize_t i, PyObject *v) {
         PyErr_SetString(PyExc_IndexError, "vector index out of range");
         return -1;
     }
-	if(!isNumber(v)) return -1;
+    if(!isNumber(v)) return -1;
     self->ob_vector[i] = getNumber(v);
     return 0;
 }
@@ -206,15 +206,15 @@ PyVector_init(PyVectorObject *self, PyObject *args, PyObject *kwds) {
         return -1;
     }
     Py_ssize_t n = PyList_Size(pList);
-	if(n <= 0) {
+    if(n <= 0) {
         PyErr_SetString(PyExc_TypeError, "size of list must be greater than 0");
         return -1;
-	}
+    }
     vector<double> data;
     for(Py_ssize_t i = 0; i < n; ++i) {
         pItem = PyList_GetItem(pList, i);
         if(! isNumber(pItem))  return -1;
-		else data.push_back(getNumber(pItem));
+        else data.push_back(getNumber(pItem));
     }
     self->ob_vector = Vector(data);
     return 0;
@@ -261,16 +261,16 @@ static PyMemberDef PyMatrix_members[] = {
 };
 
 static PyMethodDef PyMatrix_methods[] = {
-	{"Jacobi", (PyCFunction)PyMatrix_Jacobi, METH_NOARGS, "jacobi method for symmetric matrix's eigenvals"},
-	{"inv", (PyCFunction)PyMatrix_inv, METH_NOARGS, "invertible matrix"},
-	{"det", (PyCFunction)PyMatrix_det, METH_NOARGS, "determinant of matrix"},
-	{"LUsolve", (PyCFunction)PyMatrix_LUsolve, METH_O, "LU solve Ax = b"},
-	{"LUdecomp", (PyCFunction)PyMatrix_LUdecomp, METH_NOARGS, "LU decompose"},
+    {"Jacobi", (PyCFunction)PyMatrix_Jacobi, METH_NOARGS, "jacobi method for symmetric matrix's eigenvals"},
+    {"inv", (PyCFunction)PyMatrix_inv, METH_NOARGS, "invertible matrix"},
+    {"det", (PyCFunction)PyMatrix_det, METH_NOARGS, "determinant of matrix"},
+    {"LUsolve", (PyCFunction)PyMatrix_LUsolve, METH_O, "LU solve Ax = b"},
+    {"LUdecomp", (PyCFunction)PyMatrix_LUdecomp, METH_NOARGS, "LU decompose"},
     {"copy", (PyCFunction)PyMatrix_Copy, METH_NOARGS, "deep copy of matrix"},
-	{"getRowSize", (PyCFunction)PyMatrix_getRowSize, METH_NOARGS, "get matrix row size"},
-	{"getColSize", (PyCFunction)PyMatrix_getColSize, METH_NOARGS, "get matrix col size"},
-	{"getNRowVec", (PyCFunction)PyMatrix_getNRowVec, METH_O, "get nth row vector of matrix"},
-	{"getNColVec", (PyCFunction)PyMatrix_getNColVec, METH_O, "get nth col vector of matrix"},
+    {"getRowSize", (PyCFunction)PyMatrix_getRowSize, METH_NOARGS, "get matrix row size"},
+    {"getColSize", (PyCFunction)PyMatrix_getColSize, METH_NOARGS, "get matrix col size"},
+    {"getNRowVec", (PyCFunction)PyMatrix_getNRowVec, METH_O, "get nth row vector of matrix"},
+    {"getNColVec", (PyCFunction)PyMatrix_getNColVec, METH_O, "get nth col vector of matrix"},
     {NULL}  /* Sentinel */
 };
 
@@ -292,63 +292,63 @@ static PyTypeObject PyMatrixType = {
 
 static PyVectorObject *
 PyMatrix_Jacobi(PyMatrixObject *self) {
-	if(! self->ob_matrix.isSquare() || ! self->ob_matrix.isSymmetric()) {
-		PyErr_SetString(PyExc_ValueError, "matrix is not square or is not symmetric");
-		return NULL;
-	}
-	PyMatrixObject * tmp = PyMatrix_Copy(self);
+    if(! self->ob_matrix.isSquare() || ! self->ob_matrix.isSymmetric()) {
+        PyErr_SetString(PyExc_ValueError, "matrix is not square or is not symmetric");
+        return NULL;
+    }
+    PyMatrixObject * tmp = PyMatrix_Copy(self);
     PyVectorObject *ret = (PyVectorObject*)PyType_GenericAlloc(&PyVectorType, 0);
-	ret->ob_vector = move(tmp->ob_matrix.Jacobi());
-	Py_XDECREF(tmp);
-	return ret;
+    ret->ob_vector = move(tmp->ob_matrix.Jacobi());
+    Py_XDECREF(tmp);
+    return ret;
 }
 
 static PyMatrixObject *
 PyMatrix_inv(PyMatrixObject *self) {
-	if(! self->ob_matrix.isSquare() || isZero(self->ob_matrix.det())) {
-		PyErr_SetString(PyExc_ValueError, "matrix is not square or is singular matrix");
-		return NULL;
-	}
-	PyMatrixObject *ret = PyMatrix_Copy(self);
-	ret->ob_matrix = move(ret->ob_matrix.inv());
-	return ret;
+    if(! self->ob_matrix.isSquare() || isZero(self->ob_matrix.det())) {
+        PyErr_SetString(PyExc_ValueError, "matrix is not square or is singular matrix");
+        return NULL;
+    }
+    PyMatrixObject *ret = PyMatrix_Copy(self);
+    ret->ob_matrix = move(ret->ob_matrix.inv());
+    return ret;
 }
 
 static PyObject *
 PyMatrix_det(PyMatrixObject *self) {
-	if(! self->ob_matrix.isSquare()) {
-		PyErr_SetString(PyExc_ValueError, "matrix is not square");
-		return NULL;
-	}
-	double det = self->ob_matrix.det();
-	return PyFloat_FromDouble(isZero(det)?0.0:det); // 美化0 = =
+    if(! self->ob_matrix.isSquare()) {
+        PyErr_SetString(PyExc_ValueError, "matrix is not square");
+        return NULL;
+    }
+    double det = self->ob_matrix.det();
+    return PyFloat_FromDouble(isZero(det)?0.0:det); // 美化0 = =
 }
 
 static PyVectorObject *
 PyMatrix_LUsolve(PyMatrixObject *self, PyVectorObject *y) {
     if(!PyObject_TypeCheck(y, &PyVectorType)) {
-		PyErr_SetString(PyExc_TypeError, "y must be linalg.Vector");
-		return NULL;
-	}
-	if(y->ob_vector.getSize() != self->ob_matrix.getRowSize()) {
-		PyErr_SetString(PyExc_ValueError, "matrix row size must be equal y size");
-		return NULL;
-	}
-	if(! self->ob_matrix.isSquare() || isZero(self->ob_matrix.det())) {
-		PyErr_SetString(PyExc_ValueError, "matrix is not square or is singular matrix");
-		return NULL;
-	}
+        PyErr_SetString(PyExc_TypeError, "y must be linalg.Vector");
+        return NULL;
+    }
+    if(y->ob_vector.getSize() != self->ob_matrix.getRowSize()) {
+        PyErr_SetString(PyExc_ValueError, "matrix row size must be equal y size");
+        return NULL;
+    }
+    if(! self->ob_matrix.isSquare() || isZero(self->ob_matrix.det())) {
+        PyErr_SetString(PyExc_ValueError, "matrix is not square or is singular matrix");
+        return NULL;
+    }
     PyVectorObject *ret = (PyVectorObject*)PyType_GenericAlloc(&PyVectorType, 0);
-	ret->ob_vector = move(self->ob_matrix.LUsolve(y->ob_vector));
-	return ret;
+    ret->ob_vector = move(self->ob_matrix.LUsolve(y->ob_vector));
+    return ret;
 }
 
 
 static PyMatrixObject *
 PyMatrix_LUdecomp(PyMatrixObject *self) {
-	PyMatrixObject *ret = PyMatrix_Copy(self);
-	ret->ob_matrix = move(ret->ob_matrix.LUdecomp());
-	return ret;
+    PyMatrixObject *ret = PyMatrix_Copy(self);
+    ret->ob_matrix = move(ret->ob_matrix.LUdecomp());
+    return ret;
 }
 
 static PyMatrixObject *
@@ -360,46 +360,46 @@ PyMatrix_Copy(PyMatrixObject *self) {
 
 static PyObject*
 PyMatrix_getRowSize(PyMatrixObject *self) {
-	return PyLong_FromLong(self->ob_matrix.getRowSize());
+    return PyLong_FromLong(self->ob_matrix.getRowSize());
 }
 
 static PyObject*
 PyMatrix_getColSize(PyMatrixObject *self) {
-	return PyLong_FromLong(self->ob_matrix.getColSize());
+    return PyLong_FromLong(self->ob_matrix.getColSize());
 }
 
 static PyVectorObject*
 PyMatrix_getNRowVec(PyMatrixObject *self, PyObject* i) {
-	if(! PyLong_Check(i)) {
-		PyErr_SetString(PyExc_TypeError, "n must be number");
-		return NULL;
-	}
-	size_t ii = getNumber(i);
-	if(ii >= self->ob_matrix.getRowSize()) {
-		PyErr_SetString(PyExc_IndexError, "i must be less matrix row size");
-		return NULL;
-	}
+    if(! PyLong_Check(i)) {
+        PyErr_SetString(PyExc_TypeError, "n must be number");
+        return NULL;
+    }
+    size_t ii = getNumber(i);
+    if(ii >= self->ob_matrix.getRowSize()) {
+        PyErr_SetString(PyExc_IndexError, "i must be less matrix row size");
+        return NULL;
+    }
 
     PyVectorObject *vec = (PyVectorObject*)PyType_GenericAlloc(&PyVectorType, 0);
-	vec->ob_vector = move(self->ob_matrix.getNRowVec(ii));
-	return vec;
+    vec->ob_vector = move(self->ob_matrix.getNRowVec(ii));
+    return vec;
 }
 
 static PyVectorObject*
 PyMatrix_getNColVec(PyMatrixObject *self, PyObject* i) {
-	if(! PyLong_Check(i)) {
-		PyErr_SetString(PyExc_TypeError, "n must be number");
-		return NULL;
-	}
-	size_t ii = getNumber(i);
-	if(ii >= self->ob_matrix.getColSize()) {
-		PyErr_SetString(PyExc_IndexError, "i must be less matrix row size");
-		return NULL;
-	}
+    if(! PyLong_Check(i)) {
+        PyErr_SetString(PyExc_TypeError, "n must be number");
+        return NULL;
+    }
+    size_t ii = getNumber(i);
+    if(ii >= self->ob_matrix.getColSize()) {
+        PyErr_SetString(PyExc_IndexError, "i must be less matrix row size");
+        return NULL;
+    }
 
     PyVectorObject *vec = (PyVectorObject*)PyType_GenericAlloc(&PyVectorType, 0);
-	vec->ob_vector = move(self->ob_matrix.getNColVec(ii));
-	return vec;
+    vec->ob_vector = move(self->ob_matrix.getNColVec(ii));
+    return vec;
 }
 
 static int
@@ -410,56 +410,56 @@ PyMatrix_init(PyMatrixObject *self, PyObject *args, PyObject *kwds) {
         return -1;
     }
     Py_ssize_t m = PyList_Size(pList);
-	if(m <= 0) {
+    if(m <= 0) {
         PyErr_SetString(PyExc_TypeError, "size of list must be greater than 0");
         return -1;
-	}
-	pItem = PyList_GetItem(pList, 0);
-	if(! PyObject_TypeCheck(pItem, &PyList_Type)) {
+    }
+    pItem = PyList_GetItem(pList, 0);
+    if(! PyObject_TypeCheck(pItem, &PyList_Type)) {
         PyErr_SetString(PyExc_TypeError, "parameter must be a list of list.");
         return -1;
-	}
+    }
 
     Py_ssize_t n = PyList_Size(pItem);
-	if(n <= 0) {
+    if(n <= 0) {
         PyErr_SetString(PyExc_TypeError, "size of list must be greater than 0");
         return -1;
-	}
+    }
 
     vector<vector<double>> data(m, vector<double>(n, 0));
-	for(Py_ssize_t i = 0; i < m; ++i) {
-		pItem = PyList_GetItem(pList, i);
-		if(! PyObject_TypeCheck(pItem, &PyList_Type)) {
-			PyErr_SetString(PyExc_TypeError, "parameter must be a list of list.");
-			return -1;
-		}
-		if(PyList_Size(pItem) != n) {
-			PyErr_SetString(PyExc_TypeError, "list of list must be matrix");
-			return -1;
-		}
+    for(Py_ssize_t i = 0; i < m; ++i) {
+        pItem = PyList_GetItem(pList, i);
+        if(! PyObject_TypeCheck(pItem, &PyList_Type)) {
+            PyErr_SetString(PyExc_TypeError, "parameter must be a list of list.");
+            return -1;
+        }
+        if(PyList_Size(pItem) != n) {
+            PyErr_SetString(PyExc_TypeError, "list of list must be matrix");
+            return -1;
+        }
 
-		for(Py_ssize_t j = 0; j < n; ++j) {
-			pVal = PyList_GetItem(pItem, j);
-			if(! isNumber(pVal)) return -1;
-			data[i][j] = getNumber(pVal);
-		}
-	}
-	self->ob_matrix = Matrix(data);
-	return 0;
+        for(Py_ssize_t j = 0; j < n; ++j) {
+            pVal = PyList_GetItem(pItem, j);
+            if(! isNumber(pVal)) return -1;
+            data[i][j] = getNumber(pVal);
+        }
+    }
+    self->ob_matrix = Matrix(data);
+    return 0;
 }
 
 static PyObject *
 PyMatrix_str(PyMatrixObject *self) {
     static char str[100 << 10], buffer[1<<9];
     char *ps = str, *pb = buffer;
-	for(size_t i = 0; i < self->ob_matrix.getRowSize(); ++i) {
-		for(size_t j = 0; j < self->ob_matrix.getColSize(); ++j) {
-			sprintf(buffer, "%10.6f ", self->ob_matrix.at(i, j));
-			pb = buffer; while(*pb && (*ps++ = *pb++));
-		}
-		*ps++ = '\n';
-	}
-	*ps = '\0';
+    for(size_t i = 0; i < self->ob_matrix.getRowSize(); ++i) {
+        for(size_t j = 0; j < self->ob_matrix.getColSize(); ++j) {
+            sprintf(buffer, "%10.6f ", self->ob_matrix.at(i, j));
+            pb = buffer; while(*pb && (*ps++ = *pb++));
+        }
+        *ps++ = '\n';
+    }
+    *ps = '\0';
     return Py_BuildValue("s", str);
 }
 
