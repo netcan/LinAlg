@@ -10,9 +10,9 @@
 #define LINALG_H
 
 #include <vector>
-#include "stdio.h"
-using std::vector;
+#include <cstdio>
 using std::pair;
+using std::vector;
 
 namespace LinAlg {
 	struct RetType;
@@ -34,7 +34,7 @@ namespace LinAlg {
 	public:
 		friend class Matrix;
 		friend RetType;
-		Vector(size_t n = 1, VecType type = VecType::Col): data(n, 0.0), type(type) {};
+		Vector(size_t n = 1, VecType type = VecType::Col): data(n, 0.0), type(type) {}
 		Vector(const vector<double>&& data, VecType type = VecType::Col): data(data), type(type) {}
 		Vector(const vector<double>& data, VecType type = VecType::Col): data(data), type(type) {}
 

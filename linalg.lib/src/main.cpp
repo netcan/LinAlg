@@ -46,5 +46,7 @@ int main() {
 	printf("%f\n", det);
 	printf("%f\n", r.det());
 
+	printf("%ld\n", sizeof(y));
+
 	return 0;
 }

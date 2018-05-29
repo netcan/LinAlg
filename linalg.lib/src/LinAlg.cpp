@@ -23,7 +23,7 @@ bool LinAlg::isZero(double a) {
 void Vector::show() {
 	printf(type == VecType::Row ? "R":"C");
 	printf("(");
-	for(size_t i = 0; i < data.size(); ++i) printf("%lf%c", data[i], i == data.size() - 1 ? ')':' ');
+	for(size_t i = 0; i < getSize(); ++i) printf("%lf%c", data[i], i == getSize() - 1 ? ')':' ');
 	puts("");
 	return;
 }
@@ -200,7 +200,7 @@ double Matrix::det() const {
 		for(size_t j = i + 1; j < PLU.first.size(); ++j)
 			if(PLU.first[i] > PLU.first[j]) sign = !sign;
 	double ret = sign?-1.0:1.0;
-	for(size_t i = 0; i < LU.data.size(); ++i)
+	for(size_t i = 0; i < LU.getRowSize(); ++i)
 		ret *= LU.data[P[i]][i];
 	return ret;
 }

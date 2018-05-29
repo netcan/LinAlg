@@ -14,7 +14,7 @@ using namespace LinAlg;
 
 // 定义Vector类
 typedef struct {
-	PyObject_HEAD
+    PyObject_HEAD;
 	Vector ob_vector;
 } PyVectorObject;
 
